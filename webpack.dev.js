@@ -13,6 +13,7 @@ const Dashboard = require('webpack-dashboard');
 const DashboardPlugin = require('webpack-dashboard/plugin');
 const dashboard = new Dashboard();
 const HtmlWebpackPlugin = require('html-webpack-plugin');
+const SpriteLoaderPlugin = require('svg-sprite-loader/plugin');
 
 
 // config files
@@ -45,7 +46,7 @@ const configureDevServer = () => {
         // Use sane to monitor all of the templates files and sub-directories
         before: (app, server) => {
             const watcher = sane(path.join(__dirname, settings.paths.templates), {
-                glob: ['**/*'],
+                glob: ['**/*.html'],
                 poll: !!parseInt(settings.devServerConfig.poll()),
             });
             watcher.on('change', function(filePath, root, stat) {
@@ -60,16 +61,31 @@ const configureDevServer = () => {
 const configureImageLoader = () => {
     return {
             test: /\.(png|jpe?g|gif|svg|webp)$/i,
+            exclude: path.resolve(__dirname, './src/assets/img/sprite-images'),
             use: [
                 {
                     loader: 'file-loader',
                     options: {
-                        name: 'img/[name].[hash].[ext]'
+                        name: '[path][name].[ext]',
                     }
                 }
             ]
         };
 };
+
+
+// Configure SVG loader
+const configureSVGLoader = () => {
+    return {
+        test: /\.svg$/,
+        include: path.resolve(__dirname, './src/assets/img/sprite-images'), // new line
+        use: [
+            'svg-sprite-loader',
+            'svgo-loader'
+        ]
+    };
+};
+
 
 // Configure the Postcss loader
 const configurePostcssLoader = () => {
@@ -113,19 +129,20 @@ module.exports = merge(
             },
             mode: 'development',
             devtool: 'inline-source-map',
-            devServer: configureDevServer(MODERN_CONFIG),
+            devServer: configureDevServer(),
             module: {
                 rules: [
-                    configurePostcssLoader(MODERN_CONFIG),
-                    configureImageLoader(MODERN_CONFIG),
+                    configurePostcssLoader(),
+                    configureImageLoader(),
+                    configureSVGLoader(),
                 ],
             },
             plugins: [
                 new webpack.HotModuleReplacementPlugin(),
                 new DashboardPlugin(dashboard.setData),
                 new HtmlWebpackPlugin({
+                    template: path.resolve(__dirname, 'src/index.html'),
                     filename: 'index.html',
-                    template: './templates/index.html'
                 })
             ],
         }
