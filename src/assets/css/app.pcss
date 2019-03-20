@@ -15,7 +15,7 @@
  * https://github.com/tailwindcss/tailwindcss/blob/master/css/preflight.css
  */
 
- @import "tailwindcss/preflight";
+ @import "./components/base.pcss";
 
 /**
  * This injects any component classes registered by plugins.
@@ -23,13 +23,13 @@
  */
 @import 'tailwindcss/components';
 
-/**
+/**ya
  * Here we add custom component classes; stuff we want loaded
  * *before* the utilities so that the utilities can still
  * override them.
  *
  */
-@import './components/typography.pcss';
+
 @import './components/global.pcss';
 
 /**

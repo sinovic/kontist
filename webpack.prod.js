@@ -9,16 +9,22 @@ const webpack = require('webpack');
 // webpack plugins
 const BundleAnalyzerPlugin = require('webpack-bundle-analyzer').BundleAnalyzerPlugin;
 const CleanWebpackPlugin = require('clean-webpack-plugin');
+const CompressionPlugin = require('compression-webpack-plugin');
 const CreateSymlinkPlugin = require('create-symlink-webpack-plugin');
 const CriticalCssPlugin = require('critical-css-webpack-plugin');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
-const ImageminWebpWebpackPlugin = require('imagemin-webp-webpack-plugin');
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 const OptimizeCSSAssetsPlugin = require('optimize-css-assets-webpack-plugin');
 const PurgecssPlugin = require('purgecss-webpack-plugin');
-const SaveRemoteFilePlugin = require('save-remote-file-webpack-plugin');
 const TerserPlugin = require('terser-webpack-plugin');
 const WhitelisterPlugin = require('purgecss-whitelister');
+const zopfli = require('@gfx/zopfli');
+const SpriteLoaderPlugin = require('svg-sprite-loader/plugin');
+
+// const SaveRemoteFilePlugin = require('save-remote-file-webpack-plugin');
+// const ImageminWebpWebpackPlugin = require('imagemin-webp-webpack-plugin');
+// const WebappWebpackPlugin = require('webapp-webpack-plugin');
+// const WorkboxPlugin = require('workbox-webpack-plugin');
 
 // config files
 const common = require('./webpack.common.js');
@@ -58,7 +64,35 @@ const configureBanner = () => {
 const configureBundleAnalyzer = () => {
     return {
         analyzerMode: 'static',
-        reportFilename: 'report.html',
+        reportFilename: 'report-modern.html',
+    };
+};
+
+// Configure Compression webpack plugin
+const configureCompression = () => {
+    return {
+        filename: '[path].gz[query]',
+        test: /\.(js|css|html|svg)$/,
+        threshold: 10240,
+        minRatio: 0.8,
+        deleteOriginalAssets: false,
+        compressionOptions: {
+            numiterations: 15,
+            level: 9
+        },
+        algorithm(input, compressionOptions, callback) {
+            return zopfli.gzip(input, compressionOptions, callback);
+        }
+    };
+};
+
+
+// Configure Html webpack
+const configureHtml = () => {
+    return {
+        template: path.resolve(__dirname, 'src/index.html'),
+        filename: path.resolve(__dirname, 'dist/index.html'),
+        chunks: ['app']
     };
 };
 
@@ -66,7 +100,7 @@ const configureBundleAnalyzer = () => {
 const configureCriticalCss = () => {
     return (settings.criticalCssConfig.pages.map((row) => {
             const criticalSrc = settings.urls.critical + row.url;
-            const criticalDest = settings.criticalCssConfig.base + row.template + settings.criticalCssConfig.suffix;
+            const criticalDist = settings.criticalCssConfig.base + row.template + settings.criticalCssConfig.suffix;
             let criticalWidth = settings.criticalCssConfig.criticalWidth;
             let criticalHeight = settings.criticalCssConfig.criticalHeight;
             // Handle Google AMP templates
@@ -74,11 +108,11 @@ const configureCriticalCss = () => {
                 criticalWidth = settings.criticalCssConfig.ampCriticalWidth;
                 criticalHeight = settings.criticalCssConfig.ampCriticalHeight;
             }
-            console.log("source: " + criticalSrc + " dest: " + criticalDest);
+            console.log("source: " + criticalSrc + " dist: " + criticalDist);
             return new CriticalCssPlugin({
                 base: './',
                 src: criticalSrc,
-                dest: criticalDest,
+                dest: criticalDist,
                 extract: false,
                 inline: false,
                 minify: true,
@@ -98,24 +132,16 @@ const configureCleanWebpack = () => {
     };
 };
 
-// Configure Html webpack
-const configureHtml = () => {
-    return {
-        filename: 'index.html',
-        template: './templates/index.html',
-        chunks: ['app']
-    };
-};
-
 // Configure Image loader
 const configureImageLoader = () => {
     return {
         test: /\.(png|jpe?g|gif|svg|webp)$/i,
+        exclude: path.resolve(__dirname, './src/assets/img/sprite-images'),
         use: [
             {
                 loader: 'file-loader',
                 options: {
-                    name: 'img/[name].[hash].[ext]'
+                    name: 'img/[name].[ext]'
                 }
             },
             {
@@ -138,6 +164,23 @@ const configureImageLoader = () => {
                             ]
                         }),
                     ]
+                }
+            }
+        ]
+    };
+};
+
+// Configure SVG loader
+const configureSVGLoader = () => {
+    return {
+        test: /\.svg$/,
+        include: path.resolve(__dirname, './src/assets/img/sprite-images'), // new line
+        use: [
+            {
+                loader: "svg-sprite-loader",
+                options: {
+                    extract: true,
+                    spriteFilename: svgPath => `/img/sprites/sprite${svgPath.substr(-4)}`
                 }
             }
         ]
@@ -180,14 +223,19 @@ const configureOptimization = () => {
 // Configure Postcss loader
 const configurePostcssLoader = () => {
     return {
-        test: /\.(pcss|s?css)$/,
+        test: /\.(pcss|css)$/,
         use: [
-            MiniCssExtractPlugin.loader,
+            {
+                loader: MiniCssExtractPlugin.loader,
+                options: {
+                    publicPath: '../',
+                },
+            },
             {
                 loader: 'css-loader',
                 options: {
                     importLoaders: 2,
-                    sourceMap: true
+                    sourceMap: true,
                 }
             },
             {
@@ -234,53 +282,55 @@ const configureTerser = () => {
 };
 
 // Production module exports
-module.exports =
-    merge(
-        common,
-        {
-            output: {
-                filename: path.join('./js', '[name].[chunkhash].js'),
-            },
-            mode: 'production',
-            devtool: 'source-map',
-            optimization: configureOptimization(),
-            module: {
-                rules: [
-                    configurePostcssLoader(),
-                    configureImageLoader(),
-                ],
-            },
-            plugins: [
-                new CleanWebpackPlugin(settings.paths.dist.clean,
-                    configureCleanWebpack()
-                ),
-                new HtmlWebpackPlugin(
-                    configureHtml()
-                ),
-                new MiniCssExtractPlugin({
-                    path: path.resolve(__dirname, settings.paths.dist.base),
-                    filename: path.join('./css', '[name].[chunkhash].css'),
-                }),
-                new PurgecssPlugin(
-                    configurePurgeCss()
-                ),
-                new webpack.optimize.ModuleConcatenationPlugin(),
-                new webpack.BannerPlugin(
-                    configureBanner()
-                ),
-                new ImageminWebpWebpackPlugin(),
-                new CreateSymlinkPlugin(
-                    settings.createSymlinkConfig,
-                    true
-                ),
-                new SaveRemoteFilePlugin(
-                    settings.saveRemoteFileConfig
-                ),
-                new BundleAnalyzerPlugin(
-                    configureBundleAnalyzer(),
-                ),
-            ].concat(
-                configureCriticalCss()
-            )
-        }
-    );
+module.exports = merge(
+    common,
+    {
+        output: {
+            filename: path.join('./js', '[name].[chunkhash].js'),
+        },
+        mode: 'production',
+        devtool: 'source-map',
+        optimization: configureOptimization(),
+        module: {
+            rules: [
+                configurePostcssLoader(),
+                configureImageLoader(),
+                configureSVGLoader(),
+            ],
+        },
+        plugins: [
+            new CleanWebpackPlugin(settings.paths.dist.clean,
+                configureCleanWebpack()
+            ),
+            new MiniCssExtractPlugin({
+                path: path.resolve(__dirname, settings.paths.dist.base),
+                filename: path.join('./css', '[name].[chunkhash].css'),
+            }),
+            new PurgecssPlugin(
+                configurePurgeCss()
+            ),
+            new webpack.BannerPlugin(
+                configureBanner()
+            ),
+            new SpriteLoaderPlugin(),
+            new HtmlWebpackPlugin(
+                configureHtml()
+            ),
+            new CreateSymlinkPlugin(
+                settings.createSymlinkConfig,
+                true
+            ),
+            // new SaveRemoteFilePlugin(
+            //     settings.saveRemoteFileConfig
+            // ),
+            new CompressionPlugin(
+                configureCompression()
+            ),
+            new BundleAnalyzerPlugin(
+                configureBundleAnalyzer(),
+            ),
+        ].concat(
+            configureCriticalCss()
+        )
+    }
+);

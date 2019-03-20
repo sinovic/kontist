@@ -29,12 +29,12 @@ const configureBabelLoader = () => {
                     ],
                 ],
                 plugins: [
-                    '@babel/plugin-syntax-dynamic-import',
-                    [
-                        "@babel/plugin-transform-runtime", {
-                        "regenerator": true
-                    }
-                    ]
+                    // '@babel/plugin-syntax-dynamic-import',
+                    // [
+                    //     "@babel/plugin-transform-runtime", {
+                    //         "regenerator": true
+                    //     }
+                    // ]
                 ],
             },
         },

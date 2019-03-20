@@ -1,0 +1,43 @@
+/**
+ * components/global.css
+ *
+ * Project-wide styles
+ *
+ */
+
+
+body {
+  max-width: 1600px;
+  min-width: 420px;
+}
+
+.max-1600 {
+  max-width: 1600px;
+}
+
+@media (min-width: 960px) {
+  .nfc-payment {
+    @apply absolute;
+    top: -80px;
+    left: -480px;
+  }
+
+  .hand-and-keys {
+    @apply absolute;
+    max-width: 750px;
+    right: -440px;
+    top: -180px;
+  }
+
+  .bottom-signup {
+    background-image: url("../../img/BottomIllustration.png");
+    background-size: auto 100%;
+    @apply bg-no-repeat bg-right;
+  }
+
+  .app-screenshots {
+    width: 330px;
+    @apply absolute pin-b pin-r;
+  }
+}
+

@@ -1,7 +1,7 @@
 // webpack.settings.js - webpack settings config
 
 // node modules
-// require('dotenv').config();
+require('dotenv').config();
 
 // Webpack settings exports
 // noinspection WebpackConfigHighlighting
@@ -11,25 +11,25 @@ module.exports = {
     paths: {
         src: {
             base: "./src/",
-            css: "./src/css/",
-            js: "./src/js/"
+            css: "./src/assets/css/",
+            js: "./src/assets/js/"
         },
         dist: {
-            base: "./dist/",
+            base: "./dist/assets/",
             clean: [
                 "./img",
-                "./criticalcss",
+                "./critical",
                 "./css",
                 "./js"
             ]
         },
-        templates: "./templates/"
+        templates: "./src/"
     },
     urls: {
-        live: "https://example.com/",
+        live: "http://example.com/",
         local: "http://example.test/",
-        critical: "http://example.test/",
-        publicPath: () => process.env.PUBLIC_PATH || "/dist/",
+        critical: "http://kontist.test/",
+        publicPath: () => process.env.PUBLIC_PATH || "./assets/", //./dist/
     },
     vars: {
         cssName: "styles"
@@ -37,14 +37,8 @@ module.exports = {
     entries: {
         "app": "app.js"
     },
-    // copyWebpackConfig: [
-    //     {
-    //         from: "./src/js/workbox-catch-handler.js",
-    //         to: "js/[name].[ext]"
-    //     }
-    // ],
     criticalCssConfig: {
-        base: "./web/dist/criticalcss/",
+        base: "./dist/assets/critical/",
         suffix: "_critical.min.css",
         criticalHeight: 1200,
         criticalWidth: 1200,
@@ -53,7 +47,7 @@ module.exports = {
         ampCriticalWidth: 600,
         pages: [
             {
-                url: "",
+                url: "/",
                 template: "index"
             }
         ]
@@ -70,11 +64,11 @@ module.exports = {
     },
     purgeCssConfig: {
         paths: [
-            "./templates/**/*.{twig,html}",
+            "./src/**/*.{twig,html}",
             "./src/vue/**/*.{vue,html}"
         ],
         whitelist: [
-            "./src/css/components/**/*.{css,pcss}"
+            "./src/assets/css/components/**/*.{css,pcss}"
         ],
         whitelistPatterns: [],
         extensions: [
@@ -84,18 +78,25 @@ module.exports = {
             "vue"
         ]
     },
-    saveRemoteFileConfig: [
-        {
-            url: "https://www.google-analytics.com/analytics.js",
-            filepath: "js/analytics.js"
-        }
-    ],
     createSymlinkConfig: [
         {
-            origin: "img/favicons/favicon.ico",
+            origin: "assets/img/favicon/favicon.ico",
             symlink: "../favicon.ico"
         }
     ],
+    // copyWebpackConfig: [
+    //     {
+    //         from: "./src/js/workbox-catch-handler.js",
+    //         to: "js/[name].[ext]"
+    //     }
+    // ],
+    // saveRemoteFileConfig: [
+    //     {
+    //         url: "https://www.google-analytics.com/analytics.js",
+    //         filepath: "js/analytics.js"
+    //     }
+    // ],
+
     // webappConfig: {
     //     logo: "./src/img/favicon-src.png",
     //     prefix: "img/favicons/"
