@@ -21,20 +21,20 @@ const configureBabelLoader = () => {
                     [
                         '@babel/preset-env', {
                         modules: false,
-                        useBuiltIns: 'entry',
+                        // useBuiltIns: 'entry',
                         // targets: {
                         //     browsers: browserList,
                         // },
-                    }
+                                    }
                     ],
                 ],
                 plugins: [
-                    // '@babel/plugin-syntax-dynamic-import',
-                    // [
-                    //     "@babel/plugin-transform-runtime", {
-                    //         "regenerator": true
-                    //     }
-                    // ]
+                    '@babel/plugin-syntax-dynamic-import',
+                    [
+                        "@babel/plugin-transform-runtime", {
+                            "regenerator": true
+                        }
+                    ]
                 ],
             },
         },

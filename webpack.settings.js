@@ -38,10 +38,10 @@ module.exports = {
         "app": "app.js"
     },
     criticalCssConfig: {
-        base: "./dist/assets/critical/",
+        base: "./dist/",
         suffix: "_critical.min.css",
         criticalHeight: 1200,
-        criticalWidth: 1200,
+        criticalWidth: 900,
         ampPrefix: "amp_",
         ampCriticalHeight: 19200,
         ampCriticalWidth: 600,

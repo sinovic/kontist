@@ -27,6 +27,8 @@ new LazyLoad({
     threshold: 100,
 });
 
+console.log('Hello from App.js!!!');
+
 
 
 

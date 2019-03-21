@@ -14,6 +14,7 @@ const CreateSymlinkPlugin = require('create-symlink-webpack-plugin');
 const CriticalCssPlugin = require('critical-css-webpack-plugin');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
+const ImageminWebpWebpackPlugin = require('imagemin-webp-webpack-plugin');
 const OptimizeCSSAssetsPlugin = require('optimize-css-assets-webpack-plugin');
 const PurgecssPlugin = require('purgecss-webpack-plugin');
 const TerserPlugin = require('terser-webpack-plugin');
@@ -22,7 +23,6 @@ const zopfli = require('@gfx/zopfli');
 const SpriteLoaderPlugin = require('svg-sprite-loader/plugin');
 
 // const SaveRemoteFilePlugin = require('save-remote-file-webpack-plugin');
-// const ImageminWebpWebpackPlugin = require('imagemin-webp-webpack-plugin');
 // const WebappWebpackPlugin = require('webapp-webpack-plugin');
 // const WorkboxPlugin = require('workbox-webpack-plugin');
 
@@ -190,18 +190,18 @@ const configureSVGLoader = () => {
 // Configure optimization
 const configureOptimization = () => {
     return {
-        splitChunks: {
-            cacheGroups: {
-                default: false,
-                common: false,
-                styles: {
-                    name: settings.vars.cssName,
-                    test: /\.(pcss|css|vue)$/,
-                    chunks: 'all',
-                    enforce: true
-                }
-            }
-        },
+        // splitChunks: {
+        //     cacheGroups: {
+        //         // default: false,
+        //         // common: false,
+        //         styles: {
+        //             name: settings.vars.cssName,
+        //             test: /\.(pcss|css|vue)$/,
+        //             chunks: 'all',
+        //             enforce: true
+        //         }
+        //     }
+        // },
         minimizer: [
             new TerserPlugin(
                 configureTerser()
